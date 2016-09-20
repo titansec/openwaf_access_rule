@@ -59,3 +59,222 @@ Configuration Directives
     }
 }
 ```
+###unknown_host_state
+**syntax:** *"unknown_host_state": true|false*
+
+**default:** *false*
+
+**context:** *twaf_access_rule*
+
+unknown_host_state表示缺省后端服务器的开关
+
+当请求未匹配中任意接入规则时生效
+
+若unknown_host_state为false，则拦截请求
+
+若unknown_host_state为true，则关闭所有安全模块，后端服务器为default_host的值
+
+###default_host
+**syntax:** *"default_host": "ip"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+default_host表示缺省后端服务器地址（TODO：支持域名）
+
+当请求未匹配中任意接入规则，且unknown_host_state为true时，请求转发至default_host
+
+###rules
+**syntax:** *"rules": table*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+rules表示接入规则，支持多用户
+
+```txt
+--单用户
+"rules": {
+    "default":      -- 用户名，为支持多用户，所以有此一级
+    [               -- 规则顺序匹配
+    	{},         -- 规则1
+    	{}          -- 规则2
+    ]
+}
+
+--多用户
+"rules": {
+    "WANG": [{},{}],
+    "LI": [{},{}]
+}
+```
+
+###client_ssl
+**syntax:** *"client_ssl": true|false*
+
+**default:** *false*
+
+**context:** *twaf_access_rule*
+
+client_ssl表示客户端认证开关，与ngx_ssl组成双向认证，默认false
+
+###client_ssl_cert
+**syntax:** *"client_ssl_cert": "path"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+client_ssl_cert表示客户端认证所需证书地址
+
+###ngx_ssl
+**syntax:** *"ngx_ssl": true|false*
+
+**default:** *false*
+
+**context:** *twaf_access_rule*
+
+ngx_ssl表示服务器端(nginx)认证开关，与client_ssl组成双向认证，默认关闭
+
+###ngx_ssl_cert
+**syntax:** *"ngx_ssl_cert": "path"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+ngx_ssl_cert表示服务器端(nginx)认证所需证书地址
+
+###ngx_ssl_key
+**syntax:** *"ngx_ssl_key": "path"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+ngx_ssl_key表示服务器端(nginx)认证所需私钥地址
+
+###host
+**syntax:** *"host": "ip|domain name string|regex"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+host表示域名，支持正则
+
+例如:
+```
+    "host": "^1\\.1\\.1\\.1$"
+    "host": "test\\.com"
+    "host": "^.*\\.com$"
+```
+
+###path
+**syntax:** *"path": "string|regex"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+path表示路径，支持字符串及正则
+
+例如:
+```
+    "path": "/"
+    "path": "/images"
+    "path": "/[a|b]test"
+```
+
+###server_ssl
+**syntax:** *"server_ssl": true|false*
+
+**default:** *false*
+
+**context:** *twaf_access_rule*
+
+WAF向后端服务器连接的ssl开关
+```
+    upstream test {
+    	server 1.1.1.1;
+    }
+    
+    http {
+    	server {
+    	    listen 80;
+    	    server_name _;
+    	    
+    	    location / {
+    	        #server_ssl为true，则proxy_pass后为https
+    	    	proxy_pass https://test;
+    	        #server_ssl为false，则proxy_pass后为http
+    	    	#proxy_pass http://test;
+    	    }
+    	}
+    }
+```
+
+###forward
+**syntax:** *"forward": "string"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+forward表示后端服务器的uuid即upstream的名称
+```
+    #如：forward值为test
+    upstream test {
+        server 1.1.1.1;
+    }
+```
+
+###forward_addr
+**syntax:** *"forward_addr": "ip"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+forward_addr表示后端服务器的ip地址（TODO：支持域名）
+```
+    upstream test {
+        #如：forward_addr值为1.1.1.1
+    	server 1.1.1.1;
+    }
+```
+
+###forward_port
+**syntax:** *"forward_port": port*
+
+**default:** *80*
+
+**context:** *twaf_access_rule*
+
+forward_port表示后端服务器端口号，默认80
+```
+    upstream test {
+    	#如：forward_port值为50001
+    	server 1.1.1.1:50001;
+    }
+```
+
+###uuid
+**syntax:** *"uuid": "string"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+uuid表示接入规则的唯一标识，利用此标识可以查看此站点的访问频率（单位：个/秒）
+
+###policy
+**syntax:** *"policy": "policy_uuid"*
+
+**default:** *none*
+
+**context:** *twaf_access_rule*
+
+policy表示此站点使用安全策略的ID

@@ -7,7 +7,7 @@ Table of Contents
 * [Name](#name)
 * [Synopsis](#synopsis)
 * [Configuration](#configuration)
-* [Directives](#directives)
+* [variables](#variables)
 
 Synopsis
 ========

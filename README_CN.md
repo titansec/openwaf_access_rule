@@ -59,32 +59,6 @@ Configuration Directives
     }
 }
 ```
-###unknown_host_state
-**syntax:** *"unknown_host_state": true|false*
-
-**default:** *false*
-
-**context:** *twaf_access_rule*
-
-unknown_host_state表示缺省后端服务器的开关
-
-当请求未匹配中任意接入规则时生效
-
-若unknown_host_state为false，则拦截请求
-
-若unknown_host_state为true，则关闭所有安全模块，后端服务器为default_host的值
-
-###default_host
-**syntax:** *"default_host": "ip"*
-
-**default:** *none*
-
-**context:** *twaf_access_rule*
-
-default_host表示缺省后端服务器地址（TODO：支持域名）
-
-当请求未匹配中任意接入规则，且unknown_host_state为true时，请求转发至default_host
-
 ###rules
 **syntax:** *"rules": table*
 
@@ -92,24 +66,7 @@ default_host表示缺省后端服务器地址（TODO：支持域名）
 
 **context:** *twaf_access_rule*
 
-rules表示接入规则，支持多用户
-
-```txt
---单用户
-"rules": {
-    "default":      -- 用户名，为支持多用户，所以有此一级
-    [               -- 规则顺序匹配
-    	{},         -- 规则1
-    	{}          -- 规则2
-    ]
-}
-
---多用户
-"rules": {
-    "WANG": [{},{}],
-    "LI": [{},{}]
-}
-```
+接入规则，顺序执行
 
 ###client_ssl
 **syntax:** *"client_ssl": true|false*
@@ -118,7 +75,7 @@ rules表示接入规则，支持多用户
 
 **context:** *twaf_access_rule*
 
-client_ssl表示客户端认证开关，与ngx_ssl组成双向认证，默认false
+客户端认证开关，与ngx_ssl组成双向认证，默认false
 
 ###client_ssl_cert
 **syntax:** *"client_ssl_cert": "path"*
@@ -127,7 +84,7 @@ client_ssl表示客户端认证开关，与ngx_ssl组成双向认证，默认fal
 
 **context:** *twaf_access_rule*
 
-client_ssl_cert表示客户端认证所需证书地址
+客户端认证所需公钥地址
 
 ###ngx_ssl
 **syntax:** *"ngx_ssl": true|false*
@@ -136,7 +93,7 @@ client_ssl_cert表示客户端认证所需证书地址
 
 **context:** *twaf_access_rule*
 
-ngx_ssl表示服务器端(nginx)认证开关，与client_ssl组成双向认证，默认关闭
+服务器端(nginx)认证开关，与client_ssl组成双向认证，默认关闭
 
 ###ngx_ssl_cert
 **syntax:** *"ngx_ssl_cert": "path"*
@@ -145,7 +102,7 @@ ngx_ssl表示服务器端(nginx)认证开关，与client_ssl组成双向认证�
 
 **context:** *twaf_access_rule*
 
-ngx_ssl_cert表示服务器端(nginx)认证所需证书地址
+服务器端(nginx)认证所需公钥地址
 
 ###ngx_ssl_key
 **syntax:** *"ngx_ssl_key": "path"*
@@ -154,7 +111,7 @@ ngx_ssl_cert表示服务器端(nginx)认证所需证书地址
 
 **context:** *twaf_access_rule*
 
-ngx_ssl_key表示服务器端(nginx)认证所需私钥地址
+服务器端(nginx)认证所需私钥地址
 
 ###host
 **syntax:** *"host": "ip|domain name string|regex"*
@@ -163,7 +120,7 @@ ngx_ssl_key表示服务器端(nginx)认证所需私钥地址
 
 **context:** *twaf_access_rule*
 
-host表示域名，支持正则
+域名，支持正则
 
 例如:
 ```
@@ -179,7 +136,7 @@ host表示域名，支持正则
 
 **context:** *twaf_access_rule*
 
-path表示路径，支持字符串及正则
+路径，支持字符串及正则
 
 例如:
 ```
@@ -195,7 +152,9 @@ path表示路径，支持字符串及正则
 
 **context:** *twaf_access_rule*
 
-WAF向后端服务器连接的ssl开关
+OpenWAF向后端服务器连接的ssl开关
+
+例如:
 ```
     upstream test {
     	server 1.1.1.1;
@@ -207,9 +166,9 @@ WAF向后端服务器连接的ssl开关
     	    server_name _;
     	    
     	    location / {
-    	        #server_ssl为true，则proxy_pass后为https
+    	        #server_ssl为true，相当于proxy_pass后为https
     	    	proxy_pass https://test;
-    	        #server_ssl为false，则proxy_pass后为http
+    	        #server_ssl为false，相当于proxy_pass后为http
     	    	#proxy_pass http://test;
     	    }
     	}
@@ -224,6 +183,7 @@ WAF向后端服务器连接的ssl开关
 **context:** *twaf_access_rule*
 
 forward表示后端服务器的uuid即upstream的名称
+
 ```
     #如：forward值为test
     upstream test {
@@ -254,6 +214,7 @@ forward_addr表示后端服务器的ip地址（TODO：支持域名）
 **context:** *twaf_access_rule*
 
 forward_port表示后端服务器端口号，默认80
+
 ```
     upstream test {
     	#如：forward_port值为50001
@@ -268,7 +229,7 @@ forward_port表示后端服务器端口号，默认80
 
 **context:** *twaf_access_rule*
 
-uuid表示接入规则的唯一标识，利用此标识可以查看此站点的访问频率（单位：个/秒）
+接入规则的唯一标识
 
 ###policy
 **syntax:** *"policy": "policy_uuid"*
@@ -277,4 +238,4 @@ uuid表示接入规则的唯一标识，利用此标识可以查看此站点的�
 
 **context:** *twaf_access_rule*
 
-policy表示此站点使用安全策略的ID
+满足此接入规则的请求，所使用安全策略的ID

@@ -6,8 +6,6 @@ Table of Contents
 =================
 * [Name](#name)
 * [Synopsis](#synopsis)
-* [Statistical information](#statistical-information)
-* [Prerequisite modules](#prerequisite-modules)
 * [Configuration](#configuration)
 * [Directives](#directives)
 

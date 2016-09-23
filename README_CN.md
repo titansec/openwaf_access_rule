@@ -15,11 +15,12 @@ Synopsis
 #nginx.conf
 
 upstream server_1 {
-    server 1.1.1.1:8090;
+    server 0.0.0.1; #just an invalid address as a place holder
+    balancer_by_lua_file twaf_balancer.lua;
 }
 
 server {
-    listen 443;
+    listen 443 ssl;
     server_name _;
     
     set $twaf_https 1;
@@ -27,6 +28,7 @@ server {
     
     ssl_certificate nginx.crt;
     ssl_certificate_key nginx.key;
+    ssl_certificate_by_lua_file twaf_ssl_cert.lua;
     
     location / {
         proxy_pass $twaf_upstream_server;
@@ -48,13 +50,42 @@ server {
 {
     "twaf_access_rule": [
         "rules": [
-            {
-                "host": "test.com", 
+            {   #单向认证
+                "ngx_ssl": true,
+                "ngx_ssl_cert": "ngx_a.crt",
+                "ngx_ssl_key": "ngx_a.key",
+                "host": "test_a.com", 
                 "path": "/", 
                 "server_ssl": false,
                 "forward": "server_1", 
+                "forward_addr": "1.1.1.1",
+                "forward_port": "8080",
                 "uuid": "access_567b067ff2060",
-                "policy": "policy_uuid"
+                "policy": "policy_1"
+            },
+            {   #双向认证
+                "client_ssl": true,
+                "client_ssl_cert": "client_a.cert",
+                "ngx_ssl": true,
+                "ngx_ssl_cert": "ngx_a.crt",
+                "ngx_ssl_key": "ngx_a.key",
+                "host": "test_b.com", 
+                "path": "/", 
+                "server_ssl": false,
+                "forward": "server_1", 
+                "forward_addr": "1.1.1.2",
+                "forward_port": "8090",
+                "uuid": "access_567b067ff2061",
+                "policy": "policy_2"
+            },
+            {   
+                "host": "test_c.com", 
+                "path": "/", 
+                "server_ssl": true,
+                "forward": "server_1", 
+                "forward_addr": "1.1.1.3",
+                "uuid": "access_567b067ff2062",
+                "policy": "policy_default"
             }
         ]
     }
@@ -70,10 +101,17 @@ Configuration
     "twaf_access_rule": [
         "rules": [                                 -- 注意先后顺序
             {                                      
+                "client_ssl": false,               -- 客户端认证的开关，与ngx_ssl组成双向认证
+                "client_ssl_cert": "path",         -- 客户端认证所需公钥地址
+                "ngx_ssl": false,                  -- nginx认证的开关
+                "ngx_ssl_cert": "path",            -- nginx认证所需公钥地址
+                "ngx_ssl_key": "path",             -- nginx认证所需私钥地址
                 "host": "^1\\.1\\.1\\.1$",         -- 域名，支持字符串、正则
                 "path": "\/",                      -- 路径，支持字符串、正则
                 "server_ssl": false,               -- 后端服务器ssl开关
                 "forward": "server_5",             -- 后端服务器upstream名称
+                "forward_addr": "1.1.1.2",         -- 后端服务器ip地址
+                "forward_port": "8080",            -- 后端服务器端口号（缺省80）
                 "uuid": "access_567b067ff2060",    -- 用来标记此规则的uuid
                 "policy": "policy_uuid"            -- 安全策略ID
             }

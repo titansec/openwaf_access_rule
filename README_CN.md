@@ -66,6 +66,7 @@ server {
 
 Configuration
 =============
+
 ```txt
 {
     "twaf_access_rule": [
@@ -274,7 +275,7 @@ forward_port表示后端服务器端口号，默认80
 
 Variables
 ==========
-[Back to TOC](#table-of-contents)
+
 ###$twaf_https
 **syntax:** *set $twaf_https 0|1*
 
@@ -316,4 +317,5 @@ Variables
     等价于proxy_pass http://server_2;
 ```
 
+[Back to TOC](#table-of-contents)
 

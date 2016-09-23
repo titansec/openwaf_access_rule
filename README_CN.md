@@ -8,34 +8,66 @@ Table of Contents
 * [Synopsis](#synopsis)
 * [Statistical information](#statistical-information)
 * [Prerequisite modules](#prerequisite-modules)
-* [Configuration Directives](#configuration-directives)
+* [Configuration](#configuration)
 * [Directives](#directives)
 
 Synopsis
 ========
-```lua
-    -- app/openwaf_init.lua
-    local twaf_reqstat_m = require "lib.twaf.twaf_reqstat"
-    twaf_reqstat = twaf_reqstat_m:new(config, policy_uuids)
+```txt
+#nginx.conf
+
+upstream server_1 {
+    server 1.1.1.1:8090;
+}
+
+server {
+    listen 443;
+    server_name _;
     
-    -- app/openwaf_init_worker.lua
-    twaf_reqstat:init_worker()
+    set $twaf_https 1;
+    set $twaf_upstream_server "";
     
-    -- app/api.lua
-    api["get"]["reqstat"] = function() twaf_reqstat:reqstat_show_handler(policy_uuid) end
-    api["delete"]["reqstat"] = function() twaf_reqstat:reqstat_clear() end
+    ssl_certificate nginx.crt;
+    ssl_certificate_key nginx.key;
     
-    -- app/openwaf_log.lua
-    twaf_reqstat:reqstat_log_handler(events, policy_uuid)
+    location / {
+        proxy_pass $twaf_upstream_server;
+    }
+}
+
+server {
+    listen 80;
+    server_name _;
+    
+    set $twaf_upstream_server "";
+    
+    location / {
+        proxy_pass $twaf_upstream_server;
+    }
+}
+
+#Configuration
+{
+    "twaf_access_rule": [
+        "rules": [
+            {
+                "host": "test.com", 
+                "path": "/", 
+                "server_ssl": false,
+                "forward": "server_1", 
+                "forward_addr": "1.1.1.1",
+                "forward_port": "8090",
+                "uuid": "access_567b067ff2060",
+                "policy": "policy_uuid"
+            }
+        ]
+    }
+}
 ```
 [Back to TOC](#table-of-contents)
 
-
-[Back to TOC](#table-of-contents)
-
-
-Configuration Directives
-========================
+Configuration
+=============
 ```txt
 {
     "twaf_access_rule": [
@@ -239,3 +271,53 @@ forward_port表示后端服务器端口号，默认80
 **context:** *twaf_access_rule*
 
 满足此接入规则的请求，所使用安全策略的ID
+
+[Back to TOC](#table-of-contents)
+
+Directives
+==========
+
+
+[Back to TOC](#table-of-contents)
+###$twaf_https
+**syntax:** *set $twaf_https 0|1*
+
+**default:** *0*
+
+**context:** *server*
+
+用于标记请求是否通过ssl加密
+
+"set $twaf_https 1"，则表示请求通过ssl加密
+
+"set $twaf_https 1"，则表示请求未通过ssl加密
+
+###$twaf_upstream_server
+**syntax:** *set $twaf_upstream_server ""*
+
+**default:** *none*
+
+**context:** *server*
+
+只需要初始化为空字符串即可
+
+**syntax:** *proxy_pass $twaf_upstream_server*
+
+**default:** *none*
+
+**context:** *location*
+
+后端服务器地址，其值由"server_ssl"和"forward"确定
+
+例如：
+```
+    若"server_ssl"值为true, "forward"值为"server_1"
+    则$twaf_upstream_server值为"https://server_1"
+    等价于proxy_pass https://server_1;
+    
+    若"server_ssl"值为false, "forward"值为"server_2"
+    则$twaf_upstream_server值为"http://server_2"
+    等价于proxy_pass http://server_2;
+```
+
+

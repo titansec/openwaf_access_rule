@@ -7,7 +7,7 @@ Table of Contents
 * [Name](#name)
 * [Synopsis](#synopsis)
 * [Configuration](#configuration)
-* [variables](#variables)
+* [Variables](#variables)
 
 Synopsis
 ========
@@ -272,10 +272,8 @@ forward_port表示后端服务器端口号，默认80
 
 [Back to TOC](#table-of-contents)
 
-Directives
+Variables
 ==========
-
-
 [Back to TOC](#table-of-contents)
 ###$twaf_https
 **syntax:** *set $twaf_https 0|1*

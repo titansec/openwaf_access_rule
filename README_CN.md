@@ -1,6 +1,8 @@
 Name
 ====
-openwaf_reqstat-openwaf的统计模块，对访问信息、安全信息、转发信息等进行统计
+access_rule是OpenWAF项目的接入规则模块
+
+通过分析请求的域名和路径等信息，将请求转发至指定的后端服务器
 
 Table of Contents
 =================

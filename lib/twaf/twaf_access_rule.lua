@@ -23,14 +23,6 @@ function _M.new_modules(self, config)
     return setmetatable({config = config}, mt)
 end
 
-function _M.set_logger(self, logger)
-    self.logger = logger
-end
-
-function _M.get_logger(self)
-    return self.logger
-end
-
 local function _log_action(_twaf, cf)
 
     local log       =  {}

@@ -10,7 +10,7 @@ Table of Contents
 * [Synopsis](#synopsis)
 * [TODO](#todo)
 * [Modules Configuration Directives](#modules-configuration-directives)
-* [Variables](#variables)
+* [Nginx Variables](#nginx-variables)
 
 Synopsis
 ========

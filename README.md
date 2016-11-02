@@ -9,7 +9,7 @@ Table of Contents
 * [Name](#name)
 * [Synopsis](#synopsis)
 * [TODO](#todo)
-* [Configuration](#configuration)
+* [Modules Configuration Directives](#modules-configuration-directives)
 * [Variables](#variables)
 
 Synopsis
@@ -99,11 +99,12 @@ server {
 TODO
 ====
 * proxy ssl 客户端认证
+* proxy 支持域名
 
 [Back to TOC](#table-of-contents)
 
-Configuration
-=============
+Modules Configuration Directives
+================================
 
 ```txt
 {
@@ -111,12 +112,12 @@ Configuration
         "rules": [                                 -- 注意先后顺序
             {                                      
                 "client_ssl": false,               -- 客户端认证的开关，与ngx_ssl组成双向认证
-                "client_ssl_cert": "path",         -- 客户端认证所需公钥地址
+                "client_ssl_cert": "path",         -- 客户端认证所需证书地址
                 "ngx_ssl": false,                  -- nginx认证的开关
                 "ngx_ssl_cert": "path",            -- nginx认证所需公钥地址
                 "ngx_ssl_key": "path",             -- nginx认证所需私钥地址
-                "host": "^1\\.1\\.1\\.1$",         -- 域名，支持字符串、正则
-                "path": "\/",                      -- 路径，支持字符串、正则
+                "host": "^1\\.1\\.1\\.1$",         -- 域名，正则匹配
+                "path": "\/",                      -- 路径，正则匹配
                 "server_ssl": false,               -- 后端服务器ssl开关
                 "forward": "server_5",             -- 后端服务器upstream名称
                 "forward_addr": "1.1.1.2",         -- 后端服务器ip地址
@@ -135,7 +136,7 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-接入规则，顺序执行
+table类型，接入规则，顺序匹配
 
 ###client_ssl
 **syntax:** *"client_ssl": true|false*
@@ -153,7 +154,7 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-客户端认证所需公钥地址
+string类型，客户端认证所需证书地址，目前仅支持绝对地址
 
 ###ngx_ssl
 **syntax:** *"ngx_ssl": true|false*
@@ -162,7 +163,7 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-服务器端(nginx)认证开关，与client_ssl组成双向认证，默认关闭
+boolean类型，服务器端(nginx)认证开关，与client_ssl组成双向认证，默认关闭
 
 ###ngx_ssl_cert
 **syntax:** *"ngx_ssl_cert": "path"*
@@ -171,7 +172,7 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-服务器端(nginx)认证所需公钥地址
+string类型，服务器端(nginx)认证所需证书地址，目前仅支持绝对地址
 
 ###ngx_ssl_key
 **syntax:** *"ngx_ssl_key": "path"*
@@ -180,32 +181,33 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-服务器端(nginx)认证所需私钥地址
+string类型，服务器端(nginx)认证所需私钥地址，目前仅支持绝对地址
 
 ###host
-**syntax:** *"host": "ip|domain name string|regex"*
+**syntax:** *"host": "ip|domain name regex"*
 
 **default:** *none*
 
 **context:** *twaf_access_rule*
 
-域名，支持正则
+string类型，域名，正则匹配
 
 例如:
 ```
     "host": "^1\\.1\\.1\\.1$"
     "host": "test\\.com"
     "host": "^.*\\.com$"
+    "host": "www.baidu.com"
 ```
 
 ###path
-**syntax:** *"path": "string|regex"*
+**syntax:** *"path": "regex"*
 
 **default:** *none*
 
 **context:** *twaf_access_rule*
 
-路径，支持字符串及正则
+string类型，路径，正则匹配
 
 例如:
 ```
@@ -221,7 +223,7 @@ Configuration
 
 **context:** *twaf_access_rule*
 
-OpenWAF向后端服务器连接的ssl开关
+boolean类型，OpenWAF向后端服务器连接的ssl开关
 
 例如:
 ```
@@ -245,13 +247,13 @@ OpenWAF向后端服务器连接的ssl开关
 ```
 
 ###forward
-**syntax:** *"forward": "string"*
+**syntax:** *"forward": "upstream_uuid"*
 
 **default:** *none*
 
 **context:** *twaf_access_rule*
 
-forward表示后端服务器的uuid即upstream的名称
+string类型，forward表示后端服务器的uuid，即upstream的名称
 
 ```
     #如：forward值为test
@@ -267,7 +269,8 @@ forward表示后端服务器的uuid即upstream的名称
 
 **context:** *twaf_access_rule*
 
-forward_addr表示后端服务器的ip地址（TODO：支持域名）
+string类型，forward_addr表示后端服务器的ip地址（TODO：支持域名）
+
 ```
     upstream test {
         #如：forward_addr值为1.1.1.1
@@ -282,7 +285,7 @@ forward_addr表示后端服务器的ip地址（TODO：支持域名）
 
 **context:** *twaf_access_rule*
 
-forward_port表示后端服务器端口号，默认80
+number类型，forward_port表示后端服务器端口号，默认80
 
 ```
     upstream test {
@@ -298,7 +301,7 @@ forward_port表示后端服务器端口号，默认80
 
 **context:** *twaf_access_rule*
 
-接入规则的唯一标识
+string类型，接入规则的唯一标识
 
 ###policy
 **syntax:** *"policy": "policy_uuid"*
@@ -307,12 +310,12 @@ forward_port表示后端服务器端口号，默认80
 
 **context:** *twaf_access_rule*
 
-满足此接入规则的请求，所使用安全策略的ID
+string类型，满足此接入规则的请求，所使用安全策略的uuid
 
 [Back to TOC](#table-of-contents)
 
-Variables
-==========
+Nginx Variables
+===============
 
 ###$twaf_https
 **syntax:** *set $twaf_https 0|1*
@@ -327,6 +330,20 @@ Variables
 
 "set $twaf_https 1"，则表示请求未通过ssl加密
 
+```
+server {
+    listen 443 ssl;
+    set $twaf_https 1;
+    ...
+}
+
+server {
+    listen 80;
+    set $twaf_https 0;
+    ...
+}
+```
+
 ###$twaf_upstream_server
 **syntax:** *set $twaf_upstream_server ""*
 
@@ -334,26 +351,32 @@ Variables
 
 **context:** *server*
 
-只需要初始化为空字符串即可
+用于指定后端服务器地址，只需初始化为空字符串即可，其值由"server_ssl"和"forward"确定
 
-**syntax:** *proxy_pass $twaf_upstream_server*
-
-**default:** *none*
-
-**context:** *location*
-
-后端服务器地址，其值由"server_ssl"和"forward"确定
-
-例如：
 ```
-    若"server_ssl"值为true, "forward"值为"server_1"
-    则$twaf_upstream_server值为"https://server_1"
-    等价于proxy_pass https://server_1;
+upstream server_1 {
+    ...
+}
+
+upstream server_2 {
+    ...
+}
+
+server {
+    ...
     
-    若"server_ssl"值为false, "forward"值为"server_2"
-    则$twaf_upstream_server值为"http://server_2"
-    等价于proxy_pass http://server_2;
+    set $twaf_upstream_server "";
+    location / {
+        ...
+        proxy_pass $twaf_upstream_server;
+    }
+}
+
+若"server_ssl"值为true, "forward"值为"server_1"
+等价于proxy_pass https://server_1;
+
+若"server_ssl"值为false, "forward"值为"server_2"
+等价于proxy_pass http://server_2;
 ```
 
 [Back to TOC](#table-of-contents)
-
